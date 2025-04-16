@@ -777,7 +777,7 @@ let fancyTree = function (apex, $) {
                         $(eventsBindSel).trigger("expanded", data.node);
                     },
                     // if select an item check different types from config json and set value to the items
-                    select: function ( event, data ) {
+                    select: function (event, data) {
                         queueMicrotask(function () {
                             let node = data.node;
                             let parent = node.parent;
@@ -845,7 +845,7 @@ let fancyTree = function (apex, $) {
                         });
                     }
 
-                    $("#" + searchItemName).on("change", function () {
+                    $("#" + searchItemName).on("input", function () {
                         filterTree();
                     });
 
