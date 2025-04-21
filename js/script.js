@@ -845,7 +845,7 @@ let fancyTree = function (apex, $) {
                         });
                     }
 
-                    $("#" + searchItemName).on("input", function () {
+                    $("#" + searchItemName).on("input change", function () {
                         filterTree();
                     });
 
