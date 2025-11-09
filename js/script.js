@@ -719,6 +719,8 @@ let fancyTree = function (apex, $) {
                     debugLevel: 0, // 0:quiet, 1:normal, 2:debug
                     keyboard: configJSON.enableKeyBoard, // Support keyboard navigation.
                     quicksearch: configJSON.enableQuicksearch, // Navigate to next node by typing the first letters.
+                    autoActivate: true,
+                    clickFolderMode: 3,
                     glyph: {
                         preset: "awesome4",
                         map: {
@@ -757,6 +759,19 @@ let fancyTree = function (apex, $) {
                     },
                     source: _root,
                     init: function () {
+                        const style = $('<style>').text(`
+                            ${configJSON.regionID} .fancytree-title mark,
+                            ${configJSON.regionID} .fancytree-title .fancytree-match,
+                            ${configJSON.regionID} .fancytree-title span {
+                                pointer-events: none;
+                                cursor: inherit;
+                            }
+                            ${configJSON.regionID} .fancytree-title {
+                                cursor: pointer;
+                            }
+                        `);
+                        $('head').append(style);
+
                         markNodesWihChildren();
                         openParentOfSelected();
                         if (configJSON.setItemsOnInit) {
@@ -805,7 +820,19 @@ let fancyTree = function (apex, $) {
                         });
                     },
                     click: function (event, data) {
+                        // set focus to tree region
+                        if (!$(configJSON.regionID).find('.fancytree-container').is(':focus')) {
+                            $(configJSON.regionID).find('.fancytree-container').focus();
+                        }
+
                         if (data.targetType === "title" || data.targetType === "icon") {
+                            const tree = getTree();
+
+                            // activate node on click if not already active
+                            if (tree.filterMode && !data.node.isActive()) {
+                                data.node.setActive(true);
+                            }
+
                             if (data.node && data.node.data) {
                                 const nodeData = data.node.data;
                                 if (util.isDefinedAndNotNull(nodeData.link)) {
@@ -847,6 +874,14 @@ let fancyTree = function (apex, $) {
 
                     $("#" + searchItemName).on("input change", function () {
                         filterTree();
+                    });
+
+                    $("#" + searchItemName).on("paste", function () {
+                        setTimeout(function () {
+                            filterTree();
+                            // set focus back to tree after paste
+                            $(configJSON.regionID).find('.fancytree-container').focus();
+                        }, 50);
                     });
 
                     const startVal = apex.item(searchItemName).getValue();
@@ -927,15 +962,19 @@ let fancyTree = function (apex, $) {
             }
 
             function filterTree() {
-                let num;
+                const searchValue = apex.item(searchItemName).getValue();
                 const tree = getTree();
-                const sStr = apex.item(searchItemName).getValue();
-
-                num = tree.filterBranches.call(tree, sStr);
 
                 util.noDataMessage.hide(configJSON.regionID);
-                if (num === 0) {
-                    util.noDataMessage.show(configJSON.regionID, configJSON.noDataMessage);
+
+                if (util.isDefinedAndNotNull(searchValue) && searchValue.length > 0) {
+                    const num = tree.filterNodes(searchValue);
+
+                    if (num === 0) {
+                        util.noDataMessage.show(configJSON.regionID, configJSON.noDataMessage);
+                    }
+                } else {
+                    tree.clearFilter();
                 }
             }
 
