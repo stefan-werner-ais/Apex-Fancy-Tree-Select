@@ -16,7 +16,11 @@ function concatmainjs() {
     './js/lib/*.js',
     './js/*.js'])
     .pipe(concat('fancytree.pkgd.min.js'))
-    .pipe(terser().on('error', function (e) { console.log(e); }))
+    .pipe(terser({
+      format: {
+        comments: false  // Remove all comments
+      }
+    }).on('error', function (e) { console.log(e); }))
     .pipe(gulp.dest('./build/'));
 }
 

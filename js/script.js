@@ -719,8 +719,6 @@ let fancyTree = function (apex, $) {
                     debugLevel: 0, // 0:quiet, 1:normal, 2:debug
                     keyboard: configJSON.enableKeyBoard, // Support keyboard navigation.
                     quicksearch: configJSON.enableQuicksearch, // Navigate to next node by typing the first letters.
-                    autoActivate: true,
-                    clickFolderMode: 3,
                     glyph: {
                         preset: "awesome4",
                         map: {
@@ -962,13 +960,14 @@ let fancyTree = function (apex, $) {
             }
 
             function filterTree() {
+                let num;
                 const searchValue = apex.item(searchItemName).getValue();
                 const tree = getTree();
 
                 util.noDataMessage.hide(configJSON.regionID);
 
                 if (util.isDefinedAndNotNull(searchValue) && searchValue.length > 0) {
-                    const num = tree.filterNodes(searchValue);
+                    num = tree.filterBranches.call(tree, searchValue);
 
                     if (num === 0) {
                         util.noDataMessage.show(configJSON.regionID, configJSON.noDataMessage);
